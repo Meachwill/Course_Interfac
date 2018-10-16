@@ -8,40 +8,47 @@
 #define write 1
 #define read 0
 #define START_ACK 0x08
+#define tca9534a_inputmode 0x00
+#define tca9534a_otputmode 0x01
+#define tca9534a_configermode 0x03
+#define slave_address 0x38
 
 void TWI_sck_init(void);
 void TWI_START(void);
 void TWI_WRITE_ADDRESS(uint8_t data,uint8_t mode);
 void TWI_WRITE_DATA(uint8_t data);
 void TWI_STOP(void);
-uint8_t slave_address=0x38; 
-int slave_mode=0x00;
-int slave_data=0xff;
+
+uint8_t slave_data=0x22;
+uint8_t mode = 0;
+
 int main(void){
     ASA_M128_set();
     ASA_ID_init();
-    ASA_ID_set(1);
+    ASA_ID_set(1);          //ASA ID SET
     TWI_sck_init();
     TWI_START();
     TWI_WRITE_ADDRESS(slave_address, write);
-    TWI_WRITE_DATA(0x03);
-    TWI_WRITE_DATA(0xf0);
+    TWI_WRITE_DATA(tca9534a_configermode);
+    TWI_WRITE_DATA(0x00);
     TWI_STOP();
-    printf("End===========================\n");
-    // DDRE &= ~(1 << PE4);
+
     while(1){
         _delay_ms(1);
+        printf("slave data:\n");
+        scanf("%d",&slave_data);
+        printf("data=%x\n",slave_data);
         TWI_START();
         TWI_WRITE_ADDRESS(slave_address, write);
-        TWI_WRITE_DATA(slave_mode);
+        TWI_WRITE_DATA(tca9534a_otputmode);
         TWI_WRITE_DATA(slave_data);
         TWI_STOP();
+        }
         printf("End===========================\n");
-
-        // }
-        // return 0;
-    }
+        return 0;
 }
+
+
 void ASA_ID_set(uint8_t data)
 {
     if (data > 7)
@@ -91,7 +98,7 @@ void TWI_WRITE_ADDRESS(uint8_t data, uint8_t mode)
         }
     }else{
         if ((TWSR & 0xF8) != 0x40){
-            printf("Write address Status%x\n", (TWSR & 0xF8)); //TWSR(TWI status register) to check
+            printf("Read address Status%x\n", (TWSR & 0xF8)); //TWSR(TWI status register) to check
         }
     }
     
