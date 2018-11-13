@@ -63,9 +63,6 @@ void ASA_ID_init()
     DDRB |= (1 << PB7) | (1 << PB6) | (1 << PB5);
 };
 
-
-
-
 void TWI_sck_init(void){
     TWBR = 0x20; //set bit rate
     TWSR |= (1 << TWPS0); //(TWPS1,TWPS0)set prescalar bits   SCL freq = F_CPU / (16 + 2(TWBR).4 ^ TWPS)
@@ -73,8 +70,8 @@ void TWI_sck_init(void){
 
 void TWI_START(void){
     //must clear TWINT!!!or TWI will not operate
-    //TWSTA TWI START condition bit
-    //TWEN TWI enable bit
+    //TWSTA:TWI START condition bit
+    //TWEN:TWI enable bit
     TWCR = (1<<TWINT)|(1<<TWSTA)|(1<<TWEN);
     while (!(TWCR & (1 << TWINT))); //CHECK TWINT ENABLE
     if ((TWSR & 0xF8) != 0x08)
@@ -84,10 +81,10 @@ void TWI_START(void){
 void TWI_WRITE_ADDRESS(uint8_t data, uint8_t mode)
 {
     if(mode){
-        TWDR = ((data << 1) & ~(1)); //Address &read instruction
+        TWDR = ((data << 1) & ~(1)); //Address &write instruction
     }
     else{
-        TWDR = ((data << 1) | (1)); //Address &write instruction
+        TWDR = ((data << 1) | (1)); //Address &read instruction
     }
     TWCR = (1<<TWINT)|(1<<TWEN); //clear TWI interrupt flag ,Enable TWI
     while (!(TWCR & (1 << TWINT))); //CHECK TWINT ENABLE

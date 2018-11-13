@@ -44,7 +44,7 @@ int main()
             fts=0;
             if(i>100){
                 cli();
-                sd_set(&check);
+                sd_set(&check); 
                 if (check != 0)
                 {
                     printf("Debug point 1, error code <%d>\n", check);

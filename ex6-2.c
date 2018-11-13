@@ -16,6 +16,7 @@ void TWI_WRITE_ADDRESS(uint8_t data, uint8_t mode);
 void TWI_WRITE_DATA(uint8_t data);
 void TWI_STOP(void);
 uint8_t TWI_READ_DATA();
+uint8_t TWI_READNAK_DATA();
 float data_all;
 uint8_t data_H,data_L;
 uint8_t slave_data=0;
@@ -90,7 +91,7 @@ int main(void)
     printf("End===========================\n");
     return 0;
 }
-
+//ASA ID SET=======================================
 void ASA_ID_set(uint8_t data)
 {
     if (data > 7)
@@ -104,7 +105,10 @@ void ASA_ID_init()
 {
     DDRB |= (1 << PB7) | (1 << PB6) | (1 << PB5);
 };
+//===================================================
+
 //twi================================================
+//Bit rate set
 void TWI_sck_init(void)
 {
     TWBR = 0x20;          //set bit rate
@@ -123,15 +127,15 @@ void TWI_START(void)
         printf("%x\n", (TWSR & 0xF8) != 0x08); //TWSR(TWI status register) to check the TWINT and START
 }
 
-void TWI_WRITE_ADDRESS(uint8_t data, uint8_t mode)
+void TWI_WRITE_ADDRESS(uint8_t data, uint8_t mode) //mode 1:read , mode 2:write
 {
     if (mode)
     {
-        TWDR = ((data << 1) & ~(1)); //Address &read instruction
+        TWDR = ((data << 1) & ~(1)); //Address &write instruction
     }
     else
     {
-        TWDR = ((data << 1) | (1)); //Address &write instruction
+        TWDR = ((data << 1) | (1)); //Address &read instruction
     }
     TWCR = (1 << TWINT) | (1 << TWEN); //clear TWI interrupt flag ,Enable TWI
     while (!(TWCR & (1 << TWINT))); //CHECK TWINT ENABLE
@@ -163,6 +167,12 @@ void TWI_WRITE_DATA(uint8_t data)
 uint8_t TWI_READ_DATA()
 {
     TWCR=(1<<TWINT)|(1<<TWEN)|(1<<TWEA);
+    while (!(TWCR & (1 << TWINT)));
+    return TWDR;
+}
+uint8_t TWI_READNAK_DATA()
+{
+    TWCR = (1 << TWINT) | (1 << TWEN);
     while (!(TWCR & (1 << TWINT)));
     return TWDR;
 }
